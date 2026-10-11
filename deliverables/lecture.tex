@@ -1,0 +1,159 @@
+\documentclass[a4paper]{article}
+
+% Basic packages
+\usepackage{fontspec}\setmainfont{Noto Serif CJK SC}
+\usepackage{amsmath, amssymb}
+\usepackage{graphicx}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage[most]{tcolorbox}
+\usepackage{etoolbox}
+\usepackage{listings}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{subcaption}
+\usepackage{float}
+\usepackage{tikz}
+\IfFileExists{pgfplots.sty}{
+    \usepackage{pgfplots}
+    \pgfplotsset{compat=1.18}
+}{}
+
+% Highlight boxes
+\newtcolorbox{knowledgebox}[1]{
+    enhanced, colback=blue!5!white, colframe=blue!75!black, colbacktitle=blue!75!black,
+    coltitle=white, fonttitle=\bfseries, title=#1, attach boxed title to top left={yshift=-2mm, xshift=2mm},
+    boxrule=1pt, sharp corners
+}
+
+\newtcolorbox{importantbox}[1]{
+    enhanced, colback=yellow!10!white, colframe=yellow!80!black, colbacktitle=yellow!80!black,
+    coltitle=black, fonttitle=\bfseries, title=#1, sharp corners
+}
+
+\newtcolorbox{warningbox}[1]{
+    enhanced, colback=red!5!white, colframe=red!75!black, colbacktitle=red!75!black,
+    coltitle=white, fonttitle=\bfseries, title=#1, sharp corners
+}
+
+% Listings
+\lstset{
+    language=Python,
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{blue},
+    stringstyle=\color{red!60!black},
+    commentstyle=\color{green!60!black},
+    breaklines=true,
+    frame=single,
+    numbers=left,
+    numberstyle=\tiny\color{gray},
+    captionpos=b,
+    extendedchars=false
+}
+
+% Front-page metadata
+\newcommand{\notetitle}{基本共射放大电路的动态分析}
+\newcommand{\noteauthors}{五道口纳什 \& Codex}
+\newcommand{\notedate}{\today}
+\newcommand{\videochannel}{上海交通大学 郑益慧}
+\newcommand{\videopublishdate}{[在此填写发布日期]}
+\newcommand{\videoduration}{约 46 分钟}
+\newcommand{\videourl}{}
+\newcommand{\videocoverpath}{cover.jpg}
+
+\begin{document}
+
+\begin{titlepage}
+\centering
+{\Large 课程笔记\par}
+\vspace{1.2cm}
+{\huge\bfseries \notetitle\par}
+\vspace{0.8cm}
+{\large \noteauthors\par}
+\vspace{0.3cm}
+{\large \notedate\par}
+\vspace{1.2cm}
+
+\ifdefempty{\videocoverpath}{
+{\small 请在生成笔记时填入视频封面图的本地路径。\par}
+}{
+\includegraphics[width=0.82\textwidth,height=0.45\textheight,keepaspectratio]{\videocoverpath}\par
+}
+
+\vfill
+\begin{tcolorbox}[width=0.9\textwidth, colback=black!2!white, colframe=black!60, sharp corners]
+\textbf{视频作者/频道}：\videochannel\par
+\textbf{发布日期}：\videopublishdate\par
+\textbf{视频时长}：\videoduration\par
+\textbf{视频链接}：
+\ifdefempty{\videourl}{
+未填写
+}{
+\href{\videourl}{\nolinkurl{\videourl}}
+}
+\end{tcolorbox}
+\end{titlepage}
+
+\tableofcontents
+\newpage
+
+%% --- 正文内容开始 --- %%
+\section{问题背景：从静态工作点进入动态分析}
+本讲讨论基本共射放大电路。已知电源、电阻、晶体管静态参数和偏置条件后，目标是求输入输出电压关系、放大倍数以及输入、输出电阻。核心方法是先求静态工作点，再建立交流等效模型。
+\begin{importantbox}{动态分析的顺序}
+先画直流通路求 $I_{BQ},I_{CQ},U_{CEQ}$，再画交流通路并用小信号模型求 $r_{be}$、$A_u$、$R_i$、$R_o$。
+\end{importantbox}
+\subsection{本章小结}
+动态问题不能跳过静态工作点，因为小信号参数依赖工作点。
+
+\section{静态工作点与电位分析法}
+直流分析时，耦合电容和旁路电容视为断路。沿电路逐元件追踪电位，可以稳定地列出 KVL。例如基极回路可写为
+\[
+V_{CC}=U_{BQ}+I_{BQ}R_B,\qquad I_{CQ}=\beta I_{BQ}.
+\]
+其中 $V_{CC}$ 是电源电压，$U_{BQ}$ 是基极静态电位，$R_B$ 是偏置电阻，$I_{BQ}$ 和 $I_{CQ}$ 分别是基极、集电极静态电流。
+\begin{warningbox}{常见错误}
+不要把并非同一支路的电阻与 $I_{BQ}$ 强行相乘。应逐段判断电流，再用每个元件两端的电位差列式。
+\end{warningbox}
+\subsection{本章小结}
+电位分析法把复杂回路拆成一段一段的电位上升和下降，适合检查偏置计算。
+
+\section{交流通路与小信号等效}
+交流分析时，直流电源置零，耦合与旁路电容在中频段视为短路。晶体管替换为小信号等效模型，输入端看到 $r_{be}$，受控电流近似为 $\beta i_b$。这一步的意义是把非线性器件在工作点附近线性化。
+\[
+A_u=\frac{u_o}{u_{is}},\qquad R_i=\frac{u_i}{i_i},\qquad R_o=\frac{u_o}{i_o}.
+\]
+\subsection{本章小结}
+交流通路只保留信号变化；静态偏置仍然决定小信号参数，但不再以独立直流源形式出现在交流等效图中。
+
+\section{负载、放大倍数与输出电阻}
+接入负载 $R_L$ 后，集电极等效负载通常为 $R_C\parallel R_L$，因此电压增益的绝对值随负载变化。输出电阻用端口测试法求：从输出端看入放大电路，独立输入信号置零，再计算端口电压与电流之比。
+\begin{importantbox}{设计取舍}
+若目标是输出电压，较小的输出电阻有利于减小负载造成的衰减；若目标、级间匹配或功率传输不同，最佳取值也会不同。
+\end{importantbox}
+\subsection{本章小结}
+$R_L$ 不只是附加元件，它会改变交流等效负载，从而改变增益和工作范围。
+
+\section{总结与延伸}
+本讲的主线是“静态决定线性化位置，交流模型决定增量关系”。面对基本共射放大电路，可按以下清单操作：先断开电容求静态工作点；再将电源置零、短接电容建立交流通路；替换晶体管小信号模型；最后分别求增益、输入电阻和输出电阻。视频后段还强调，输出电阻大小应服从应用目标，不能脱离负载和信号类型孤立判断。
+
+
+% Replace this block with the generated notes.
+% Fill the metadata block above, especially \videocoverpath, so the front page
+% contains the original video cover image.
+% Keep images outside knowledgebox/importantbox/warningbox.
+% For any figure that comes from a video frame or a crop of a frame,
+% include the source time interval as a bottom footnote on the same page.
+% A stable pattern is:
+% \begin{figure}[H]
+% \centering
+% \includegraphics[width=\textwidth]{...}
+% \caption{... \protect\footnotemark}
+% \end{figure}
+% \footnotetext{视频画面时间区间：00:12:31--00:12:46。若为裁剪图，时间区间仍对应原视频画面。}
+% End the document with a final section such as:
+% \section{总结与延伸}
+% covering the speaker's closing discussion and your own synthesis.
+
+%% --- 正文内容结束 --- %%
+
+\end{document}
